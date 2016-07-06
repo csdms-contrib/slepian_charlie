@@ -1,6 +1,8 @@
 # slepian_charlie
+Quadratic spectral estimation problems using scalar Slepian functions as developed by:<br>
+<a href="http://geoweb.princeton.edu/people/simons/Dahlen+2008-GJI.html">Dahlen &amp; Simons</a><br>
+Geophys. J. Int., 174 (3), 774–807, 2008, <a href="10.1111/j.1365-246X.2008.03854.x">doi: 10.1111/j.1365-246X.2008.03854.x</a><br>
+which you may cite if you find any of these routines useful! 
 
-##Obtain first release
-The first release, 1.0.0, is deposited in Zenodo (http://dx.doi.org/10.5281/zenodo.15707).
-
-[![DOI](https://zenodo.org/badge/7664/csdms-contrib/slepian_charlie.svg)](http://dx.doi.org/10.5281/zenodo.15707)
+## Latest release
+[![DOI](https://zenodo.org/badge/6548/csdms-contrib/slepian_charlie.svg)](https://zenodo.org/badge/latestdoi/6548/csdms-contrib/slepian_charlie)
