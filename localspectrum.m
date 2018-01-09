@@ -1,5 +1,5 @@
 function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
-% [spec,specvar,spectap]=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn)
+% [spec,specvar,spectap]=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
 %
 % Calculates the local multitaper spectrum using the formula described by
 % Dahlen & Simons (2008), eq. 130
@@ -33,7 +33,7 @@ function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn
 % spec      Local power spectrum for provided spherical-harmonic degrees L
 % specvar 	Error bars for the local spectrum
 %
-% Last modified by plattner-at-alumni.ethz.ch, 12/21/2016
+% Last modified by plattner-at-alumni.ethz.ch, 01/08/2018
 
 defval('Jmax',[])
 defval('rotcoord',[])
