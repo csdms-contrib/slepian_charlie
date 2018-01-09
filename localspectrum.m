@@ -1,4 +1,4 @@
-function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn)
+function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
 % [spec,specvar,spectap]=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn)
 %
 % Calculates the local multitaper spectrum using the formula described by
@@ -25,7 +25,9 @@ function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn
 %             divide by area*4*pi
 %           1 use multiplication by (l+1) spectral normalization, no
 %             division
-%
+%           2 normalize to obtain Mauersberger-Lowes spectrum
+% rplanet   Planet radius. Only required for Mauersberger-Lowes spectrum.  
+%  
 % OUTPUT:
 %
 % spec      Local power spectrum for provided spherical-harmonic degrees L
@@ -44,7 +46,7 @@ if ~ischar(lmcosi)
     
 Lwid=Ltap;%2*Ltap+1;    
 
-if optn
+if optn==1
     fact=4*pi;
     specnorm=1;
 else
@@ -162,6 +164,13 @@ switch method
 		error('Not yet implemented')
 end
 
+if optn==2
+  %% Normalize for Mauersberger-Lowes spectrum
+  Lmax=max(lmcosi(:,1));
+  ls=(0:Lmax)';
+  spec=spec.*(ls+1).*(2*ls+1).^2/rplanet^2;
+end
+  
 
 varns={spec,specvar,spectap};
 varargout=varns(1:nargout);
