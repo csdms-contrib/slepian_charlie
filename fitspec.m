@@ -1,5 +1,5 @@
 function [fspec,res]=fitspec(spec,ls,d,rplanet,rspec)
-% [fspec,res]=fitspec(spec,ls,d)
+% [fspec,res]=fitspec(spec,ls,d,rplanet,rspec)
 %
 % Calculates a best fitting spectrum given a decorrelation depth
 %
