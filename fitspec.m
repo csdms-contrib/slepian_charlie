@@ -18,6 +18,10 @@ function [fspec,res]=fitspec(spec,ls,d,rplanet,rspec)
 %
 % Last modified by plattner-at-alumni.ethz.ch, 4/9/2018
 
+spec=spec(:);
+ls=ls(:);
+
+
 y=log(spec./(ls.*(ls+0.5).*(ls+1)));
 x=ls;
 
