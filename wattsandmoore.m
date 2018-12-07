@@ -1,4 +1,4 @@
-function slola=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
+function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
 % slola=wattsandmoore(EL,fig,convo,wit,norma,r,ifn) 
 %
 % Reproduces Figure 1 and Figure 3 from Watts and Moore, doi:10.1002/2017JB014571,
@@ -26,12 +26,13 @@ function slola=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
 %
 % OUTPUT:
 %
-% slola   Spatial expansion of the data
+% slola   Spatial expansion of the data, if you request this, you don't get
+%         the figure
 %
 % SEE ALSO PLM2POT, PLM2SPEC, PLOTPLM, PLM2XYZ
 %
 % Tested on 8.3.0.532 (R2014a) and 9.0.0.341360 (R2016a)
-% Last modified by fjsimons-at-alum.mit.edu, 12/6/2018
+% Last modified by fjsimons-at-alum.mit.edu, 12/7/2018
 
 % Should figure out to keep degres constant or variable... for movie-type plots
 
@@ -113,7 +114,6 @@ else
     % Only the expanded field
     load(fnpl,'slola')
     % Create labels for future use
-
    case 2
     % Only the coefficients
     load(fnpl,'egm')
@@ -123,113 +123,120 @@ else
   end
 end
 
- % Begin figure and create axis
- figure(1); clf; ah=gca;
+% Only make a figure if you don't request output
+if ~nargout
+  % Begin figure and create axis
+  figure(1); clf; ah=gca;
+  
+  % Now decide what figure to make
+  switch fig
+   case 1
+    % Spatial map
 
- % Now decide what figure to make
- switch fig
-  case 1
-   % Spatial map
+    % Plot on the sphere 
+    fig2print(gcf,'portrait')
+    [r,c,ph]=plotplm(setnans(slola),[],[],1,degres);
 
-   % Plot on the sphere 
-   fig2print(gcf,'portrait')
-   [r,c,ph]=plotplm(setnans(slola),[],[],1,degres);
+    % Create labels for future use
+    xxlabs=sprintf('EGM2008 free-air gravity anomaly in %s',units);
+    xlb=sprintf('spherical harmonic degrees %3.3i-%3.3i',EL);
+    
+    % Color scale
+    kelicol
 
-   % Create labels for future use
-   xxlabs=sprintf('EGM2008 free-air gravity anomaly in %s',units);
-   xlb=sprintf('spherical harmonic degrees %3.3i-%3.3i',EL);
-   
-   % Color scale
-   kelicol
+    % A relative scale that is a feast to the eyes
+    caxis(round(10.^max(halverange(log(abs(r)),15)))*[-1 1]*1e5/convo)
+    % An absolute scale that is a feast to the eyes
+    caxis([-1 1]*1e2*1e5/convo)
 
-   % A relative scale that is a feast to the eyes
-   caxis(round(10.^max(halverange(log(abs(r)),15)))*[-1 1]*1e5/convo)
-   % An absolute scale that is a feast to the eyes
-   caxis([-1 1]*1e2*1e5/convo)
+    % Color bar
+    cb=colorbar('hor');
+    
+    % Version control
+    try
+      axes(cb); 
+      xt=title(xxlabs);
+      xlabel(xlb)
+      movev(xt,range(get(cb,'ylim'))/2)
+      longticks(cb)
+      movev(cb,-.15)
+    catch
+      cb.Label.String=sprintf('%s\n%s',xxlabs,xlb);
+      cb.TickDirection='out';
+      movev(cb,-.075)
+    end
+    
+    shrink(cb,2,2)
+    
+    % Make it bigger to get a good bounding box
+    set(ah,'camerav',6.5)
+    movev([ah cb],.05)
+    
+    figdisp([],sprintf('%i_%3.3i_%3.3i',fig,EL),[],2)
 
-   % Color bar
-   cb=colorbar('hor');
-   
-   % Version control
-   try
-     axes(cb); 
-     xt=title(xxlabs);
-     xlabel(xlb)
-     movev(xt,range(get(cb,'ylim'))/2)
-     longticks(cb)
-     movev(cb,-.15)
-   catch
-     cb.Label.String=sprintf('%s\n%s',xxlabs,xlb);
-     cb.TickDirection='out';
-     movev(cb,-.075)
-   end
-   
-   shrink(cb,2,2)
-   
-   % Make it bigger to get a good bounding box
-   set(ah,'camerav',6.5)
-   movev([ah cb],.05)
-        
-   figdisp([],sprintf('%i_%3.3i_%3.3i',fig,EL),[],2)
+   case 2
+    % Spectral plot
 
-  case 2
-   % Spectral plot
+    % Spectral calculation of signal or noise - watch the normalization
+    [sdl,l,bta,lfit,logy,logpm]=plm2spec(egm(:,[1:4]+[0 0 ifn ifn]),norma);
 
-   % Spectral calculation of signal or noise - watch the normalization
-   [sdl,l,bta,lfit,logy,logpm]=plm2spec(egm(:,[1:4]+[0 0 ifn ifn]),norma);
+    fig2print(gcf,'portrait')
 
-   fig2print(gcf,'portrait')
+    % The power spectral density
+    a=loglog(l,sdl,'o');
+    hold on
+    % The loglinear fit
+    b=loglog(lfit,logy,'k-');
+    hold off
 
-   % The power spectral density
-   a=loglog(l,sdl,'o');
-   hold on
-   % The loglinear fit
-   b=loglog(lfit,logy,'k-');
-   hold off
+    % Take that fit off here
+    delete(b)
+    
+    % Create labels for future use
+    xlabs='spherical harmonic degree';
+    xxlabs='equivalent wavelength (km)';
+    ylabs=sprintf('EGM2008 power spectral density in [%s]^2',units);
 
-   % Take that fit off here
-   delete(b)
-   
-   % Create labels for future use
-   xlabs='spherical harmonic degree';
-   xxlabs='equivalent wavelength (km)';
-   ylabs=sprintf('EGM2008 power spectral density in [%s]^2',units);
+    % Cosmetics to match James' plot
+    set(a,'MarkerFaceColor','k','MarkerSize',3,'MarkerEdgeColor','k')
+    
+    xlim(EL+[-0.5 40])
+    longticks(gca)
+    shrink(gca,1.333,1.075)
 
-   % Cosmetics to match James' plot
-   set(a,'MarkerFaceColor','k','MarkerSize',3,'MarkerEdgeColor','k')
-   
-   xlim(EL+[-0.5 40])
-   longticks(gca)
-   shrink(gca,1.333,1.075)
+    % This needs to be data-dependent
+    %   ylim([0.07 1e4]*1e5/convo)
 
-   % This needs to be data-dependent
-%   ylim([0.07 1e4]*1e5/convo)
+    % The reference degrees you want plotted also
+    nn=[12 33 400];
+    % The reference degrees you wanted as well
+    hold on
+    for index=1:length(nn)
+      pn(index)=plot([nn(index) nn(index)],ylim,'k--');
+    end
+    hold off
 
-   % The reference degrees you want plotted also
-   nn=[12 33 400];
-   % The reference degrees you wanted as well
-   hold on
-   for index=1:length(nn)
-     pn(index)=plot([nn(index) nn(index)],ylim,'k--');
-   end
-   hold off
+    % Labels
+    ylabel(ylabs)
+    xlabel(xlabs)
 
-   % Labels
-   ylabel(ylabs)
-   xlabel(xlabs)
+    % The degrees you want labeled
+    if egm(1)<10 & egm(1,:)>100
+      % Replace labels with meaningful ones
+      els=[10 100]; ell={'10' '100'};
+      set(ah,'XtickLabel',ell)
+    end
+    
+    % Extra axis in equivalent wavelengths
+    nlt=[10000 1000 100];
+    [ax,xl,yl]=xtraxis(ah,round(jeans(nlt,0,1)),nlt,xxlabs);
+    longticks(ax)
+    % Output to PDF
+    figdisp([],fig,[],2)
+  end
+end
 
-   % The degrees you want labeled
-   if egm(1)<10 & egm(1,:)>100
-     % Replace labels with meaningful ones
-     els=[10 100]; ell={'10' '100'};
-     set(ah,'XtickLabel',ell)
-   end
-   
-   % Extra axis in equivalent wavelengths
-   nlt=[10000 1000 100];
-   [ax,xl,yl]=xtraxis(ah,round(jeans(nlt,0,1)),nlt,xxlabs);
-   longticks(ax)
-   % Output to PDF
-   figdisp([],fig,[],2)
- end
- 
+% Create optional output
+varns={slola};
+varargout=varns(1:nargout);
+
