@@ -24,15 +24,14 @@ defval('R','contshelves')
 defval('L',8)
 defval('J',(L+1)^2)
 defval('xver',1)
-defval('degres',1)
 
 % The example data are the EGM2008 zero-tide non-WGS84 corrected free-air
 % gravity field at the reference radius for the EGM2008 model
 defval('dlola',[])
 defval('degres',[])
 if isempty(dlola) & isempty(degres)
-  [dlola,degres]=wattsandmoore([2 400]);
-end
+  [dlola,degres]=wattsandmoore([2 400],1);
+ end
 
 % This is the sum of the eigenvalues
 N=spharea(R)*(L+1)^2;
@@ -45,40 +44,47 @@ N=spharea(R)*(L+1)^2;
 
 % Take a look using PLOTSLEP, CONTSHELVES, see also LOCALIZATION
 if xver==1
+  bob=0;
   for index=1:(L+1)^2
     clf
     % This should return the spatial taper
     % gialpha=plotslep(Glma,index);
     gialpha{index}=plotplm([dels dems C{index}],[],[],4,degres); hold on
+    % bob=bob+gialpha{index}.^2*V(index);
     % This plots the region, for now, hardcoded
     contshelves([],1)
 
     % Labels
-    title(sprintf('%s = %i ; N = %i out of %i','\alpha',...
-		  index,round(N),(L+1)^2))
-    pause
+    title(sprintf('%s = %i ; %s = %5.3f ; N = %i out of %i','\alpha',...
+		  index,'\lambda',V(index),round(N),(L+1)^2))
+    %pause(0.6)
   end
-  keyboard
 end
 
+% imagefnan([0 90],[360 -90],bob)
 
 % Prepare for arrival
 %sdl=nan(egm(end,1),length(V));
 
+
+clf
+keyboard
 % For all them
-for index=1:length(V)
+for index=1:round(N)
     disp(index)
     % Taper the data also fake it
     tapdat=dlola.*kindeks(gialpha{index},1:size(dlola,2));
     % imagesc(tapdat);
     % Spherical transform
-    lmcosi(:,:,index)=xyz2plm(tapdat,max(EL));
+    lmcosi(:,:,index)=xyz2plm(tapdat,400);
     % Normalized sum of squares
     norma=3
     [sdl(:,index),l]=plm2spec(lmcosi(:,:,index),norma);
     loglog(l,sdl(:,index),'+');         
-    drawnow
+hold on
+drawnow
 end
 
+keyboard
 % At the end, average the result
 sdlMT=mean(sdl,2)/sum(V);
