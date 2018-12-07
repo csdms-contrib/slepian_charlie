@@ -1,5 +1,5 @@
-function [sdlMT,l]=smtm(L,R,dlola,degres)
-% [sdlMT,l]=smtm(L,R,dlola,degres)
+function [sdlMT,l,N]=smtm(L,R,dlola,degres,EL,xver)
+% [sdlMT,l,N]=smtm(L,R,dlola,degres,xver)
 %
 % Bandlimited, geographically localized, spherical multitaper
 % power-spectral density estimate of a spatially gridded global data set,
@@ -12,11 +12,20 @@ function [sdlMT,l]=smtm(L,R,dlola,degres)
 % dlola     global spatial expansion, on a complete longitude and latitude
 %           grid, as coming out of PLM2XYZ or some such function (see example).
 % degres    the grid step in longitudinal degrees
+% EL        data bandwidth (1 number, >=2, defaulted) or passband (2 numbers)
+% norma     Option passed to PLM2SPEC for the sums of squares normalization
+%           1 multiplication by (l+1) 
+%           2 division by (2*l+1)
+%           3 none, i.e. a scaling factor of 1 [default]
 %
 % OUTPUT:
 %
 % sdlMT      multitaper spectral density estimate
+% l          the spherical harmonic degrees at which this is evaluated
+% N          the rounded Shannon number
 %
+% Tested on 8.3.0.532 (R2014a) and 9.0.0.341360 (R2016a)
+
 %% Last modified by fjsimons-at-alum.mit.edu, 12/7/2018
 
 % Default values
@@ -24,13 +33,15 @@ defval('R','contshelves')
 defval('L',8)
 defval('J',(L+1)^2)
 defval('xver',1)
+defval('norma',3)
 
 % The example data are the EGM2008 zero-tide non-WGS84 corrected free-air
 % gravity field at the reference radius for the EGM2008 model
 defval('dlola',[])
 defval('degres',[])
-if isempty(dlola) & isempty(degres)
-  [dlola,degres]=wattsandmoore([2 400],1);
+defval('EL',[])
+if isempty(dlola) || isempty(degres) || isempty(EL)
+  [dlola,degres,EL]=wattsandmoore([2 400],1);
  end
 
 % This is the sum of the eigenvalues
@@ -44,8 +55,8 @@ N=spharea(R)*(L+1)^2;
 
 % Take a look using PLOTSLEP, CONTSHELVES, see also LOCALIZATION
 if xver==1
-  bob=0;
   for index=1:(L+1)^2
+    % bob=0;
     clf
     % This should return the spatial taper
     % gialpha=plotslep(Glma,index);
@@ -64,27 +75,39 @@ end
 % imagefnan([0 90],[360 -90],bob)
 
 % Prepare for arrival
-%sdl=nan(egm(end,1),length(V));
-
+sdl=nan(max(EL)+1,2*N);
+l=0:max(EL);
 
 clf
+
+% Round the Shannon number for output
+N=round(N);
+
 keyboard
+
 % For all them
-for index=1:round(N)
-    disp(index)
-    % Taper the data also fake it
-    tapdat=dlola.*kindeks(gialpha{index},1:size(dlola,2));
+parfor index=1:size(sdl,2)
+    % disp(index)
+    % Taper the data 
+    tapdat=dlola.*gialpha{index};
     % imagesc(tapdat);
     % Spherical transform
-    lmcosi(:,:,index)=xyz2plm(tapdat,400);
-    % Normalized sum of squares
-    norma=3
-    [sdl(:,index),l]=plm2spec(lmcosi(:,:,index),norma);
-    loglog(l,sdl(:,index),'+');         
-hold on
-drawnow
+    lmcosi(:,:,index)=xyz2plm(tapdat,max(EL));
+    % Normalized sum of squares time the eigenvalues for averaging later
+    sdl(:,index)=V(index)*plm2spec(lmcosi(:,:,index),norma);
+    % Take a quick look without the eigenvalue
+    loglog(l,sdl(:,index)/V(index),'+');         
+    hold on
+    drawnow
 end
 
 keyboard
+
 % At the end, average the result
-sdlMT=mean(sdl,2)/sum(V);
+sdlMT=nanmean(sdl,2)/sum(V);
+
+% And make a final plot
+loglog(l,sdlMT,'ko','MarkerF','k');
+
+% And then we need to produce the variance estimates
+% mtvar
