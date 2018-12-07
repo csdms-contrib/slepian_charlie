@@ -1,5 +1,5 @@
 function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
-% slola=wattsandmoore(EL,fig,convo,wit,norma,r,ifn) 
+% [dlola,degres]=wattsandmoore(EL,fig,convo,wit,norma,r,ifn) 
 %
 % Reproduces Figure 1 and Figure 3 from Watts and Moore, doi:10.1002/2017JB014571,
 % i.e. a degree variance plot and map of bandlimited spatial expansion of
@@ -26,8 +26,9 @@ function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
 %
 % OUTPUT:
 %
-% slola   Spatial expansion of the data, if you request this, you don't get
+% dlola   Spatial expansion of the data, if you request this, you don't get
 %         the figure
+% degres  Longitude/ latitude spacing, in degrees
 %
 % SEE ALSO PLM2POT, PLM2SPEC, PLOTPLM, PLM2XYZ
 %
@@ -44,8 +45,8 @@ defval('wit','nothing');
 defval('norma',3);
 defval('ifn',0);
 
-% Default pixel resolution
-defval('degres',0.25);
+% Default pixel resolution - if you set to empty will get PLM2XYZ's default
+defval('degres',[]);
 
 % Unit awareness, not complete
 switch convo
@@ -101,18 +102,18 @@ if exist(fnpl,'file')~=2
   % Talk!
   disp(sprintf('\nGetting degree  %i order %i to degree %i order %i',...
 	       egm(1,1:2),egm(end,1:2)))
-  
+
   % Expand into spatial coordinates at appropriate degree resolution
-  [slola,lon,lat]=plm2xyz(egm(:,[1:4]),degres);
+  [dlola,lon,lat,~,degres]=plm2xyz(egm(:,[1:4]),degres);
   % Save all this information for subsequent retrieval
-  save(fnpl,'slola','egm','lon','lat')
+  save(fnpl,'dlola','egm','lon','lat','degres')
 else
   disp(sprintf('Use preloaded file %s',fnpl))
   % Load what was has been calculated for fast access
   switch fig
    case 1
     % Only the expanded field
-    load(fnpl,'slola')
+    load(fnpl,'dlola','degres')
     % Create labels for future use
    case 2
     % Only the coefficients
@@ -135,7 +136,7 @@ if ~nargout
 
     % Plot on the sphere 
     fig2print(gcf,'portrait')
-    [r,c,ph]=plotplm(setnans(slola),[],[],1,degres);
+    [r,c,ph]=plotplm(setnans(dlola),[],[],1,degres);
 
     % Create labels for future use
     xxlabs=sprintf('EGM2008 free-air gravity anomaly in %s',units);
@@ -237,6 +238,6 @@ if ~nargout
 end
 
 % Create optional output
-varns={slola};
+varns={dlola,degres};
 varargout=varns(1:nargout);
 
