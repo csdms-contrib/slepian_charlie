@@ -1,5 +1,5 @@
-function [sdlMT,l]=smtm(L,R,dlola)
-% [sdlMT,l]=smtm(L,R,dlola)
+function [sdlMT,l]=smtm(L,R,dlola,degres)
+% [sdlMT,l]=smtm(L,R,dlola,degres)
 %
 % Bandlimited, geographically localized, spherical multitaper
 % power-spectral density estimate of a spatially gridded global data set,
@@ -11,6 +11,7 @@ function [sdlMT,l]=smtm(L,R,dlola)
 % R         region of interest, e.g., 'alloceans', 'contshelves', 'africa', ...
 % dlola     global spatial expansion, on a complete longitude and latitude
 %           grid, as coming out of PLM2XYZ or some such function (see example).
+% degres    the grid step in longitudinal degrees
 %
 % OUTPUT:
 %
@@ -20,7 +21,6 @@ function [sdlMT,l]=smtm(L,R,dlola)
 
 % Default values
 defval('R','contshelves')
-% I use 72 because I have it handy
 defval('L',8)
 defval('J',(L+1)^2)
 defval('xver',1)
@@ -28,7 +28,11 @@ defval('degres',1)
 
 % The example data are the EGM2008 zero-tide non-WGS84 corrected free-air
 % gravity field at the reference radius for the EGM2008 model
-defval('dlola',wattsandmoore([2 400]))
+defval('dlola',[])
+defval('degres',[])
+if isempty(dlola) & isempty(degres)
+  [dlola,degres]=wattsandmoore([2 400]);
+end
 
 % This is the sum of the eigenvalues
 N=spharea(R)*(L+1)^2;
@@ -57,7 +61,6 @@ if xver==1
   keyboard
 end
 
-keyboard
 
 % Prepare for arrival
 %sdl=nan(egm(end,1),length(V));
