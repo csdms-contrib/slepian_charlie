@@ -1,5 +1,5 @@
 function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
-% [dlola,degres]=wattsandmoore(EL,fig,convo,wit,norma,r,ifn) 
+% [dlola,degres,EL]=wattsandmoore(EL,fig,convo,wit,norma,r,ifn) 
 %
 % Reproduces Figure 1 and Figure 3 from Watts and Moore, doi:10.1002/2017JB014571,
 % i.e. a degree variance plot and map of bandlimited spatial expansion of
@@ -29,6 +29,7 @@ function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
 % dlola   Spatial expansion of the data, if you request this, you don't get
 %         the figure
 % degres  Longitude/ latitude spacing, in degrees
+% EL      Regurgitate the input
 %
 % SEE ALSO PLM2POT, PLM2SPEC, PLOTPLM, PLM2XYZ
 %
@@ -38,7 +39,7 @@ function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
 % Should figure out to keep degres constant or variable... for movie-type plots
 
 % Default values
-defval('EL',400);
+defval('EL',[2 400]);
 defval('fig',2)
 defval('convo',1e5)
 defval('wit','nothing');
@@ -118,6 +119,7 @@ else
    case 2
     % Only the coefficients
     load(fnpl,'egm')
+    dlola=NaN;
     % Talk!
     disp(sprintf('\nGetting degree  %i order %i to degree %i order %i',...
 		 egm(1,1:2),egm(end,1:2)))
@@ -127,7 +129,7 @@ end
 % Only make a figure if you don't request output
 if ~nargout
   % Begin figure and create axis
-  figure(1); clf; ah=gca;
+  clf; ah=gca;
   
   % Now decide what figure to make
   switch fig
@@ -179,7 +181,9 @@ if ~nargout
     % Spectral plot
 
     % Spectral calculation of signal or noise - watch the normalization
-    [sdl,l,bta,lfit,logy,logpm]=plm2spec(egm(:,[1:4]+[0 0 ifn ifn]),norma);
+    [sdl,l,bta,lfit,logy,logpm]=plm2spec(egm(...
+        addmup(EL(1)-1)+1-addmup(egm(1)-1):addmup(EL(end))-addmup(egm(1)-1),...
+        [1:4]+[0 0 ifn ifn]),norma);
 
     fig2print(gcf,'portrait')
 
@@ -238,6 +242,6 @@ if ~nargout
 end
 
 % Create optional output
-varns={dlola,degres};
+varns={dlola,degres,EL};
 varargout=varns(1:nargout);
 
