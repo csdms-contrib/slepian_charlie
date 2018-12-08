@@ -75,15 +75,14 @@ end
 % imagefnan([0 90],[360 -90],bob)
 
 % Prepare for arrival
-sdl=nan(max(EL)+1,2*N);
+howmany=round(N);
+sdl=nan(max(EL)+1,howmany);
 l=0:max(EL);
 
 clf
 
 % Round the Shannon number for output
 N=round(N);
-
-keyboard
 
 % For all them
 parfor index=1:size(sdl,2)
@@ -96,18 +95,17 @@ parfor index=1:size(sdl,2)
     % Normalized sum of squares time the eigenvalues for averaging later
     sdl(:,index)=V(index)*plm2spec(lmcosi(:,:,index),norma);
     % Take a quick look without the eigenvalue
-    loglog(l,sdl(:,index)/V(index),'+');         
-    hold on
-    drawnow
+    % loglog(l,sdl(:,index)/V(index),'+');         
+    % hold on
+    % drawnow
 end
 
-keyboard
-
-% At the end, average the result
-sdlMT=nanmean(sdl,2)/sum(V);
+% At the end, AVERAGE the result
+sdlMT=size(sdl,2)*nanmean(sdl,2)/sum(V(1:size(sdl,2)));
 
 % And make a final plot
 loglog(l,sdlMT,'ko','MarkerF','k');
 
 % And then we need to produce the variance estimates
 % mtvar
+keyboard
