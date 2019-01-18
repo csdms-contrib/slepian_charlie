@@ -18,7 +18,7 @@ function [A,d,modval,modls]=getdecodepth(spec,ls,rplanet,rspec,showit)
 %
 % A         power factor (see Voorhies et al paper)
 % d         radial position of the random dipoles 
-%           (decorellation radial position)
+%           (decorrelation radial position)
 % modlval   spectrum from fitting
 % modls     degrees for fitted spectrum
 % 
@@ -69,3 +69,4 @@ m=v(1);
 q=v(2);
 
 end
+
