@@ -1,5 +1,5 @@
-function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
-% [dlola,degres,EL]=wattsandmoore(EL,fig,convo,wit,norma,r,ifn) 
+function varargout=wattsandmoore(EL,tip,convo,wit,norma,r,ifn,mods,plans,degres)
+% [dlola,degres,EL]=wattsandmoore(EL,tip,convo,wit,norma,r,ifn,mods,plans,degres) 
 %
 % Reproduces Figure 1 and Figure 3 from Watts and Moore, doi:10.1002/2017JB014571,
 % i.e. a degree variance plot and map of bandlimited spatial expansion of
@@ -8,7 +8,7 @@ function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
 % INPUT:
 %
 % EL      bandwidth (1 number, >=2, defaulted) or passband (2 numbers), defaulted
-% fig     1 spatial map from PLOTPLM/PLM2XYZ
+% tip     1 spatial map from PLOTPLM/PLM2XYZ
 %         2 spectral rendition from PLM2SPEC [default]
 % convo   1 free-air gravity in standard units
 %         2 free-air gravity in mgal [default]
@@ -21,30 +21,40 @@ function varargout=wattsandmoore(EL,fig,convo,wit,norma,r,ifn)
 %          2 division by (2*l+1)
 %          3 none, i.e. a scaling factor of 1 [default]
 % r       Radius at which this is being evaluated, by default at the reference
-% ifn     0 plots the SIGNAL strength under option fig=2 [default]
-%         2 plots the NOISE strength under option fig=2
+% ifn     0 plots the SIGNAL strength under option tip=2 [default]
+%         2 plots the NOISE strength under option tip=2
+% mods    'EGM2008' as actually in the Watts and Moore paper [default]
+%         'GMM3' as in a future paper
+% plans   'Earth' as actually in the Watts and Moore paper [default]
+%         'Mars' as in a future paper
+% degres  Longitude/ latitude spacing, in degrees (for plotting maps)
 %
 % OUTPUT:
 %
 % dlola   Spatial expansion of the data, if you request this, you don't get
-%         the figure
-% degres  Longitude/ latitude spacing, in degrees
+%         the figure, if tip===1 OR: 
+%         Spectral density of the plot... if tip==2
+% degres  Longitude/ latitude spacing, in degrees, OR:
+%         the spherical harmonic degrees... if tip==2
 % EL      Regurgitate the input
 %
 % SEE ALSO PLM2POT, PLM2SPEC, PLOTPLM, PLM2XYZ
 %
 % Tested on 8.3.0.532 (R2014a) and 9.0.0.341360 (R2016a)
-% Last modified by fjsimons-at-alum.mit.edu, 12/7/2018
+% Last modified by fjsimons-at-alum.mit.edu, 01/17/2019
 
 % Should figure out to keep degres constant or variable... for movie-type plots
 
 % Default values
-defval('EL',[2 400]);
-defval('fig',2)
+defval('EL',[33 400]);
+defval('tip',2)
 defval('convo',1e5)
 defval('wit','nothing');
 defval('norma',3);
 defval('ifn',0);
+% Model specification defaults
+defval('mods','EGM2008');
+defval('plans','plans');
 
 % Default pixel resolution - if you set to empty will get PLM2XYZ's default
 defval('degres',[]);
@@ -72,21 +82,28 @@ end
 % Talk
 disp(sprintf('\nWanting degrees %i to %i',EL(1),EL(2)))
 
-% Create filename for future use
-fnpl=fullfile(getenv('IFILES'),'GRAVITY',...
-	      sprintf('EGM2008_FreeAir_%i_%i.mat',EL));
+% Create output filename for future use
+fnpl=fullfile(getenv('IFILES'),'GRAVITY',mods,...
+	      sprintf('%s_FreeAir_%i_%i.mat',mods,EL));
+
 
 % Load, convert, expand to space, and save it or load it
-if exist(fnpl,'file')~=2
+if true% exist(fnpl,'file')~=2 
   % Get the potential coefficients from file
-  egm=fralmanac('EGM2008_ZeroTide','SHM');
-  % Check the assumption that the data started only at minel
+  if strcmp(mods,'EGM2008')
+    % Additional model specification...
+    egm=fralmanac(sprintf('%s_ZeroTide',mods),'SHM');
+  else
+    % No other funny business
+    egm=fralmanac(sprintf('%s',mods),'SHM');
+  end
+    % Check the assumption that the data started only at minel
   diferm(minel,egm(1))
 
   % Get the reference GM product
-  GM=fralmanac('GM_EGM2008','Earth');
+  GM=fralmanac(sprintf('GM_%s',mods),plans);
   % Get the reference radius
-  a=fralmanac('a_EGM2008','Earth');
+  a=fralmanac(sprintf('a_%s',mods),plans);
   % Get the evaluation radius
   defval('r',a);
   
@@ -111,18 +128,25 @@ if exist(fnpl,'file')~=2
 else
   disp(sprintf('Use preloaded file %s',fnpl))
   % Load what was has been calculated for fast access
-  switch fig
+  switch tip
    case 1
     % Only the expanded field
     load(fnpl,'dlola','degres')
+    % If you don't make figure, dlola etc are returned
     % Create labels for future use
    case 2
     % Only the coefficients
     load(fnpl,'egm')
-    dlola=NaN;
     % Talk!
     disp(sprintf('\nGetting degree  %i order %i to degree %i order %i',...
 		 egm(1,1:2),egm(end,1:2)))
+    % Spectral calculation of signal or noise - watch the normalization
+    [sdl,l,bta,lfit,logy,logpm]=plm2spec(egm(...
+        addmup(EL(1)-1)+1-addmup(egm(1)-1):addmup(EL(end))-addmup(egm(1)-1),...
+        [1:4]+[0 0 ifn ifn]),norma);
+    % If we don't make figure, return spectrum under the fake name
+    dlola=sdl;
+    degres=EL(1):EL(end);
   end
 end
 
@@ -132,16 +156,23 @@ if ~nargout
   clf; ah=gca;
   
   % Now decide what figure to make
-  switch fig
+  switch tip
    case 1
     % Spatial map
 
     % Plot on the sphere 
     fig2print(gcf,'portrait')
     [r,c,ph]=plotplm(setnans(dlola),[],[],1,degres);
-
+    
+    % No continents on Mars
+    if strcmp(plans,'Mars')
+      delete([c{1} ph])
+    else
+      % But plot the hemispherical dichotomy
+    end
+    
     % Create labels for future use
-    xxlabs=sprintf('EGM2008 free-air gravity anomaly in %s',units);
+    xxlabs=sprintf('%s free-air gravity anomaly in %s',mods,units);
     xlb=sprintf('spherical harmonic degrees %3.3i-%3.3i',EL);
     
     % Color scale
@@ -149,10 +180,13 @@ if ~nargout
 
     % A relative scale that is a feast to the eyes
     caxis(round(10.^max(halverange(log(abs(r)),15)))*[-1 1]*1e5/convo)
-    % An absolute scale that is a feast to the eyes
+    % An absolute scale that is a relative feast to the eyes
     caxis([-1 1]*1e2*1e5/convo)
-
-    % Color bar
+    if strcmp(plans,'Mars')
+      caxis([-1.5 1.5]*1e2*1e5/convo)
+    end
+    
+        % Color bar
     cb=colorbar('hor');
     
     % Version control
@@ -175,15 +209,11 @@ if ~nargout
     set(ah,'camerav',6.5)
     movev([ah cb],.05)
     
-    figdisp([],sprintf('%i_%3.3i_%3.3i',fig,EL),[],2)
+    % Output to PDF
+    figdisp([],sprintf('%i_%3.3i_%3.3i',tip,EL),[],2)
 
    case 2
     % Spectral plot
-
-    % Spectral calculation of signal or noise - watch the normalization
-    [sdl,l,bta,lfit,logy,logpm]=plm2spec(egm(...
-        addmup(EL(1)-1)+1-addmup(egm(1)-1):addmup(EL(end))-addmup(egm(1)-1),...
-        [1:4]+[0 0 ifn ifn]),norma);
 
     fig2print(gcf,'portrait')
 
@@ -200,7 +230,7 @@ if ~nargout
     % Create labels for future use
     xlabs='spherical harmonic degree';
     xxlabs='equivalent wavelength (km)';
-    ylabs=sprintf('EGM2008 power spectral density in [%s]^2',units);
+    ylabs=sprintf('%s power spectral density [%s**2]',mods,units);
 
     % Cosmetics to match James' plot
     set(a,'MarkerFaceColor','k','MarkerSize',3,'MarkerEdgeColor','k')
@@ -237,11 +267,10 @@ if ~nargout
     [ax,xl,yl]=xtraxis(ah,round(jeans(nlt,0,1)),nlt,xxlabs);
     longticks(ax)
     % Output to PDF
-    figdisp([],fig,[],2)
+    figdisp([],tip,[],2)
   end
 end
 
 % Create optional output
 varns={dlola,degres,EL};
 varargout=varns(1:nargout);
-
