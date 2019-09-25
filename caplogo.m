@@ -21,7 +21,9 @@ function [ah,ax]=caplogo(ahin,sord,loc,wid,hit,ang)
 % ah        The extra axis containing the top polar cap
 % ax        The extra axis containing the bottom polar cap if available
 %
-% Last modified by fjsimons-at-alum.mit.edu, 2/19/2007
+% TESTED ON 8.3.0.532 (R2014a)
+%
+% Last modified by fjsimons-at-alum.mit.edu, 09/25/2019
 
 defval('ahin',gca)
 defval('sord',1)
