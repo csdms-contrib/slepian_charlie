@@ -46,6 +46,8 @@ function varargout=wattsandmoore(EL,tip,convo,wit,norma,r,ifn,mods,plans,degres)
 %
 %% Reproduces a piece of 10.1002/2017JB014571, Figure 1
 % wattsandmoore([3 400],2,1e5,'nothing',3,[],0,'EGM2008','Earth',[])
+%% Reproduces a piece of 10.1002/2017JB014571, Figure 3
+% wattsandmoore([33 400],1,1e5,'nothing',[],[],0,'EGM2008','Earth',[])
 %
 % Tested on 8.3.0.532 (R2014a) and 9.0.0.341360 (R2016a)
 % Last modified by fjsimons-at-alum.mit.edu, 03/18/2020
@@ -188,11 +190,13 @@ if ~nargout
     caxis(round(10.^max(halverange(log(abs(r)),15)))*[-1 1]*1e5/convo)
     % An absolute scale that is a relative feast to the eyes
     caxis([-1 1]*1e2*1e5/convo)
+    % An absolute scale that is a relative feast to the eyes
+    caxis([-40 40]*1e5/convo)
     if strcmp(plans,'Mars')
       caxis([-1.5 1.5]*1e2*1e5/convo)
     end
     
-        % Color bar
+    % Color bar
     cb=colorbar('hor');
     
     % Version control
@@ -215,6 +219,7 @@ if ~nargout
     set(ah,'camerav',6.5)
     movev([ah cb],.05)
     
+    keyboard
     % Output to PDF
     figdisp([],sprintf('%i_%3.3i_%3.3i',tip,EL),[],2)
 
@@ -272,6 +277,7 @@ if ~nargout
     nlt=[10000 1000 100];
     [ax,xl,yl]=xtraxis(ah,round(jeans(nlt,0,1)),nlt,xxlabs);
     longticks(ax)
+    keyboard
     % Output to PDF
     figdisp([],tip,[],2)
   end
