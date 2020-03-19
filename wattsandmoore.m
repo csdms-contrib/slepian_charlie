@@ -10,8 +10,8 @@ function varargout=wattsandmoore(EL,tip,convo,wit,norma,r,ifn,mods,plans,degres)
 % EL      bandwidth (1 number, >=2, defaulted) or passband (2 numbers), defaulted
 % tip     1 spatial map from PLOTPLM/PLM2XYZ
 %         2 spectral rendition from PLM2SPEC [default]
-% convo   1 free-air gravity in standard units
-%         2 free-air gravity in mgal [default]
+% convo     1 free-air gravity in standard units
+%         1e5 free-air gravity in mgal [default]
 % wit     Option passed to PLM2POT
 %           'nothing' when no reference is subtracted [default]
 %           'WGS84' if your reference is WGS84 (even-degree zonals)
@@ -38,15 +38,22 @@ function varargout=wattsandmoore(EL,tip,convo,wit,norma,r,ifn,mods,plans,degres)
 %         the spherical harmonic degrees... if tip==2
 % EL      Regurgitate the input
 %
-% SEE ALSO PLM2POT, PLM2SPEC, PLOTPLM, PLM2XYZ
+% SEE ALSO:
+%
+% PLM2POT, PLM2SPEC, PLOTPLM, PLM2XYZ
+%
+% EXAMPLE: 
+%
+%% Reproduces a piece of 10.1002/2017JB014571, Figure 1
+% wattsandmoore([3 400],2,1e5,'nothing',3,[],0,'EGM2008','Earth',[])
 %
 % Tested on 8.3.0.532 (R2014a) and 9.0.0.341360 (R2016a)
-% Last modified by fjsimons-at-alum.mit.edu, 01/17/2019
+% Last modified by fjsimons-at-alum.mit.edu, 03/18/2020
 
 % Should figure out to keep degres constant or variable... for movie-type plots
 
 % Default values
-defval('EL',[33 400]);
+defval('EL',[3 400]);
 defval('tip',2)
 defval('convo',1e5)
 defval('wit','nothing');
@@ -54,7 +61,7 @@ defval('norma',3);
 defval('ifn',0);
 % Model specification defaults
 defval('mods','EGM2008');
-defval('plans','plans');
+defval('plans','Earth');
 
 % Default pixel resolution - if you set to empty will get PLM2XYZ's default
 defval('degres',[]);
@@ -86,9 +93,8 @@ disp(sprintf('\nWanting degrees %i to %i',EL(1),EL(2)))
 fnpl=fullfile(getenv('IFILES'),'GRAVITY',mods,...
 	      sprintf('%s_FreeAir_%i_%i.mat',mods,EL));
 
-
 % Load, convert, expand to space, and save it or load it
-if true% exist(fnpl,'file')~=2 
+if exist(fnpl,'file')~=2 
   % Get the potential coefficients from file
   if strcmp(mods,'EGM2008')
     % Additional model specification...
