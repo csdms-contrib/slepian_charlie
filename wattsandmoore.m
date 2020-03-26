@@ -2,7 +2,7 @@ function varargout=wattsandmoore(EL,tip,convo,wit,norma,r,ifn,mods,plans,degres)
 % [dlola,degres,EL]=wattsandmoore(EL,tip,convo,wit,norma,r,ifn,mods,plans,degres) 
 %
 % Reproduces Figure 1 and Figure 3 from Watts and Moore, doi:10.1002/2017JB014571,
-% i.e. a degree variance plot and map of bandlimited spatial expansion of
+% i.e. a degree-variance plot and map of bandlimited spatial expansion of
 % the EGM2008 gravitational potential model by Pavlis et al., doi:10.1029/2011JB008916
 %
 % INPUT:
