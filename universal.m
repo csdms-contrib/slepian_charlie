@@ -19,7 +19,9 @@ function [Mro,lp,Mra,lpp]=universal(L,l)
 % Mra    Coupling matrix values centered around the diagonal [better approximation]
 % lpp    The supposed column index (contained in the better approximation)
 %
-% Last modified by fjsimons-at-alum.mit.edu, 03/25/2020
+% See also BUNIVERSAL, for the equivalent result for the boxcar estimate
+% 
+% Last modified by fjsimons-at-alum.mit.edu, 03/26/2020
 
 % There's a slight redundancy here with the symmetry, but let's hold off
 % optimizing this the moment. The crude approximation involves an
