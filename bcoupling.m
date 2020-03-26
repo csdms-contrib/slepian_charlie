@@ -2,7 +2,7 @@ function varargout=bcoupling(TH,Lmax,sord,meth,xver)
 % [K,A]=BCOUPLING(TH,Lmax,sord,meth,xver)
 %
 % Calculates the coupling matrix due to a spherical boxcar.
-% Dahlen & Simons (2008), Eq. (57)
+% Dahlen & Simons (2008), Eq. 57, doi: 10.1111/j.1365-246X.2008.03854.x
 %
 % INPUT:
 %
@@ -28,7 +28,7 @@ function varargout=bcoupling(TH,Lmax,sord,meth,xver)
 %
 % bcoupling('demo') % Should return nothing
 %
-% Last modified by fjsimons-at-alum.mit.edu, 05/09/2007
+% Last modified by fjsimons-at-alum.mit.edu, 03/26/2020
 
 if ~isstr(TH)
 
