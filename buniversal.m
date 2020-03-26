@@ -21,7 +21,7 @@ function [Mro,lp]=buniversal(TH,Lmax,l,sord)
 % Mro    Coupling matrix values centered around the diagonal [crude approximation]
 % lp     The supposed column index (for plotting purposes only)
 %
-% See also UNIVERSAL, for the same result of the multitaper estimate
+% See also UNIVERSAL, for the equivalent result for the multitaper estimate
 %
 % Last modified by fjsimons-at-alum.mit.edu, 03/26/2020
 
