@@ -6,3 +6,5 @@ which you may cite if you find any of these routines useful!
 
 ## Latest release
 [![DOI](https://zenodo.org/badge/6548/csdms-contrib/slepian_charlie.svg)](https://zenodo.org/badge/latestdoi/6548/csdms-contrib/slepian_charlie)
+
+[![View slepian_charlie on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/71418-slepian_charlie)
