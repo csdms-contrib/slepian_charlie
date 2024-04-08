@@ -1,5 +1,5 @@
 function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
-% [spec,specvar,spectap]=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
+% [spec,spectap,V,specvar]=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
 %
 % Calculates the local multitaper spectrum using the formula described by
 % Dahlen & Simons (2008), eq. 130
@@ -30,10 +30,12 @@ function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn
 %  
 % OUTPUT:
 %
-% spec      Local power spectrum for provided spherical-harmonic degrees L
+% spec        Local power spectrum for provided spherical-harmonic degrees L
+% spectap   The individual tapered spectra
+% V              concentration values
 % specvar 	Error bars for the local spectrum
 %
-% Last modified by plattner-at-alumni.ethz.ch, 01/08/2018
+% Last modified by plattner-at-alumni.ethz.ch, 04/08/2024
 
 defval('Jmax',[])
 defval('rotcoord',[])
@@ -133,20 +135,32 @@ switch method
                 plm2spec(xyz2plm(...
                 reshape(gtimesd(alpha,:),length(lat),length(lon)),Lmax),specnorm); 
             % If you want to see the individual tapered spectra: 
-            if nargout>2
+            if nargout>1
                 spectap{alpha}=specprod;
             end
             % And normalize and sum them up
             spec=spec+V(alpha)/sumV*specprod;            
         end        
            
-        if nargout<=2
+        if nargout<=1
             spectap=[];
+            specvar=[];
+        else
+            warning('Since April 8, 2024: Second output is cell of individually tapered spec and 4th output is error bars')
         end        
         
         % Now get the error bars if you ask for them
-        if nargout>1            
-            specvar=mtvar(spec,(0:Lmax)',Lwid,dom); 
+        if nargout>3            
+            try
+                specvar=mtvar(spec,(0:Lmax)',Lwid,dom); 
+            catch
+                warning('problems with wignercycle, thus mtvar is currently out of order')
+                specvar = [];
+                %warning('calculate first wigner symbols. This may take a while but only the first time')
+                %wignercycle(2*Lmax);
+                %specvar=mtvar(spec,(0:Lmax)',Lwid,dom);
+                %keyboard
+            end
         else
             specvar=[];
         end
@@ -169,10 +183,15 @@ if optn==2
   Lmax=max(lmcosi(:,1));
   ls=(0:Lmax)';
   spec=spec.*(ls+1).*(2*ls+1).^2/rplanet^2;
-end
-  
 
-varns={spec,specvar,spectap};
+  if nargout>1
+    for alpha=1:Jmax
+        spectap{alpha}=spectap{alpha}.*(ls+1).*(2*ls+1).^2/rplanet^2;
+    end
+  end
+end
+
+varns={spec,spectap,V,specvar};
 varargout=varns(1:nargout);
 
 elseif strcmp(lmcosi,'demo1')
