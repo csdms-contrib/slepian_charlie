@@ -191,7 +191,7 @@ if optn==2
   end
 end
 
-varns={spec,spectap,V,specvar};
+varns={spec,spectap,V(:),specvar};
 varargout=varns(1:nargout);
 
 elseif strcmp(lmcosi,'demo1')
