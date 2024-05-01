@@ -16,11 +16,11 @@ function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn
 % rotcoord  Center of spherical cap region if not northpole in degrees
 %           [longitude colatitude], 0<=longitude<360, 0<=colatitude<=180
 % Nspec     Global spectrum of the noise
-% method 	There are different ways to do this:
-% 			1 evaluate, multiply with tapers, get spectrum, sum
-% 		 	2 Use analytical expression for integral of three spherical-harmonics
-% 			3 Appendix of Dahlen & Simons (2008)
-% 			4 plm2spec(GJ*GJ'c)
+% method 	  There are different ways to do this:
+% 			    1 evaluate, multiply with tapers, get spectrum, sum
+% 		 	    2 Use analytical expression for integral of three spherical-harmonics
+% 			    3 Appendix of Dahlen & Simons (2008)
+% 			    4 plm2spec(GJ*GJ'c)
 % optn      0 (default) use division by (2*l+1) spectral normalization and 
 %             divide by area*4*pi
 %           1 use multiplication by (l+1) spectral normalization, no
@@ -31,11 +31,12 @@ function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn
 % OUTPUT:
 %
 % spec        Local power spectrum for provided spherical-harmonic degrees L
-% spectap   The individual tapered spectra
-% V              concentration values
-% specvar 	Error bars for the local spectrum
+% spectap     The individual tapered spectra
+% V           concentration values
+% sig         standard deviation from the individual single taper spectra
+% specvar 	  Error bars for the local spectrum (currently broken)
 %
-% Last modified by plattner-at-alumni.ethz.ch, 04/08/2024
+% Last modified by plattner-at-alumni.ethz.ch, 05/01/2024
 
 defval('Jmax',[])
 defval('rotcoord',[])
@@ -145,12 +146,13 @@ switch method
         if nargout<=1
             spectap=[];
             specvar=[];
+            sig = [];        
         else
             warning('Since April 8, 2024: Second output is cell of individually tapered spec and 4th output is error bars')
         end        
         
         % Now get the error bars if you ask for them
-        if nargout>3            
+        if nargout>4            
             try
                 specvar=mtvar(spec,(0:Lmax)',Lwid,dom); 
             catch
@@ -191,7 +193,12 @@ if optn==2
   end
 end
 
-varns={spec,spectap,V(:),specvar};
+if nargout>1
+    SV = cell2mat(spectap);
+    sig = std(SV,V(1:Jmax),2);
+end
+
+varns={spec,spectap,V(:),sig,specvar};
 varargout=varns(1:nargout);
 
 elseif strcmp(lmcosi,'demo1')
