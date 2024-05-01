@@ -1,5 +1,5 @@
 function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
-% [spec,spectap,V,specvar]=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
+% [spec,spectap,V,sig,specvar]=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn,rplanet)
 %
 % Calculates the local multitaper spectrum using the formula described by
 % Dahlen & Simons (2008), eq. 130
