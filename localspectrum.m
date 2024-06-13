@@ -195,7 +195,7 @@ end
 
 if nargout>1
     SV = cell2mat(spectap);
-    sig = std(SV,V(1:Jmax),2);
+    sig = std(SV,abs(V(1:Jmax)),2); % For some regions, the eigenvalues can be around -eps.
 end
 
 varns={spec,spectap,V(:),sig,specvar};
