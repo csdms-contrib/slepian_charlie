@@ -705,7 +705,13 @@ ov=ones(size(bigS));
     % eval(sprintf('save %s Gp p K',fnpl))
     % Don't save the TH or you're in trouble, later... can always
     % calculate of course
-    save(fnpl,'Gp','p','K')
+    try
+        save(fnpl,'Gp','p','K')
+    catch
+         [filepath,name,ext] = fileparts(fnpl); 
+        mkdir(filepath)
+        save(fnpl,'Gp','p','K')
+    end
   end
 
   if xver==1

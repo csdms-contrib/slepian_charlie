@@ -34,9 +34,9 @@ function varargout=localspectrum(lmcosi,Ltap,dom,Jmax,rotcoord,Nspec,method,optn
 % spectap     The individual tapered spectra
 % V           concentration values
 % sig         standard deviation from the individual single taper spectra
-% specvar 	  Error bars for the local spectrum (currently broken)
+% specvar 	  Error bars for the local spectrum (Dahlen&Simons alternative to sig)
 %
-% Last modified by plattner-at-alumni.ethz.ch, 05/01/2024
+% Last modified by plattner-at-alumni.ethz.ch, 08/01/2024
 
 defval('Jmax',[])
 defval('rotcoord',[])
@@ -193,6 +193,9 @@ if optn==2
     for alpha=1:Jmax
         spectap{alpha}=spectap{alpha}.*(ls+1).*(2*ls+1).^2/rplanet^2;
     end
+  end
+  if nargout>4    
+      specvar=specvar(:).*(ls+1).*(2*ls+1).^2/rplanet^2;
   end
 end
 
