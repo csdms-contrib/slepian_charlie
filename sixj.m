@@ -105,7 +105,8 @@ if ~isstr(l1) % Not a demo
     else
       disp('Executing WIGNERCYCLE')
       % Precompute the database
-      wignercycle(L,6);
+      %wignercycle(L,6); % Alain Plattner, 8/1/2024: need to use simi=1 in
+      wignercycle(L,6,0);
       % And have a go again
       s=sixj(l1,l2,l3,l4,l5,l6,L,meth);
     end

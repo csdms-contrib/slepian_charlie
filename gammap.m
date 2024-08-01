@@ -238,9 +238,13 @@ if ndto>=1
     dbL=2*L;
     % Load the ZEROJ database just once, for the maximum at all required
     [~,C0,S0]=zeroj(0,0,0,dbL);
-    keyboard
+    %keyboard
     % Load the THREEJ database just once, as well
-    [~,C3,S3]=threej(0,0,0,0,0,0,dbL);
+    try
+        [~,C3,S3]=threej(0,0,0,0,0,0,dbL);
+    catch
+        wignercycle(dbL,1,0);
+    end
   end
 
   if meth==1
@@ -315,8 +319,15 @@ if ndto>=1
 	end
 	
 	% Selection rules - those of the 3j contain those of the 6j
-	selx=triangle(bigS,p,bigUp) & triangle(bigSp,p,bigU) ...
-	     & triangle(bigS,e,bigSp) & triangle(bigU,e,bigUp) ...
+	% selx=triangle(bigS,p,bigUp) & triangle(bigSp,p,bigU) ...
+	%      & triangle(bigS,e,bigSp) & triangle(bigU,e,bigUp) ...
+	%      & ~mod(bigS+p+bigUp,2) & ~mod(bigSp+p+bigU,2) ...
+	%      & ~mod(bigS+e+bigSp,2) & ~mod(bigU+e+bigUp,2);
+%Alain Plattner: 8/1/2024: triangle needs all three elements to have the
+%same length
+ov=ones(size(bigS));
+    	selx=triangle(bigS,p*ov,bigUp) & triangle(bigSp,p*ov,bigU) ...
+	     & triangle(bigS,e*ov,bigSp) & triangle(bigU,e*ov,bigUp) ...
 	     & ~mod(bigS+p+bigUp,2) & ~mod(bigSp+p+bigU,2) ...
 	     & ~mod(bigS+e+bigSp,2) & ~mod(bigU+e+bigUp,2);
 	% Apply the selection rules

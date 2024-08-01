@@ -155,9 +155,12 @@ switch method
         if nargout>4            
             try
                 specvar=mtvar(spec,(0:Lmax)',Lwid,dom); 
+                specvar=specvar(:);
             catch
-                warning('problems with wignercycle, thus mtvar is currently out of order')
-                specvar = [];
+                keyboard
+                %warning('problems with wignercycle, thus mtvar is currently out of order')
+                %specvar = [];
+
                 %warning('calculate first wigner symbols. This may take a while but only the first time')
                 %wignercycle(2*Lmax);
                 %specvar=mtvar(spec,(0:Lmax)',Lwid,dom);
